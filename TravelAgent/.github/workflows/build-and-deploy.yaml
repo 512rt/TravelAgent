@@ -4,7 +4,7 @@ on:
     workflow_dispatch:
     push:
         branches:
-            - master # Change to 'main' if your default branch is 'main'
+            - master
 
 env:
     AZURE_WEBAPP_NAME: TravelAgent
