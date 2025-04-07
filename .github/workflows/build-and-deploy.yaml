@@ -7,7 +7,7 @@ on:
             - master
 
 env:
-    AZURE_WEBAPP_NAME: TravelAgent
+    AZURE_WEBAPP_NAME: TravelAgent1
     AZURE_WEBAPP_PACKAGE_PATH: './TravelAgent/publish'
     DOTNET_VERSION: '9.x'
     SOLUTION_PATH: 'TravelAgent.sln'
