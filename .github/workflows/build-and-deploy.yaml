@@ -11,7 +11,7 @@ env:
     AZURE_WEBAPP_PACKAGE_PATH: './TravelAgent/publish'
     DOTNET_VERSION: '9.x'
     SOLUTION_PATH: 'TravelAgent.sln'
-    API_PROJECT_PATH: 'TravelAgent'
+    API_PROJECT_PATH: 'TravelAgent/TravelAgent.csproj'
     PUBLISH_DIR: './publish'
 
 jobs:
