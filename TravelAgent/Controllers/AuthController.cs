@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using TravelAgent.Models;
 using TravelAgent.Services;
 
 namespace TravelAgent.Controllers;
@@ -35,9 +36,3 @@ public class AuthController : ControllerBase
         }
     }
 }
-
-public class LoginRequest
-{
-    public string Username { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-} 

@@ -13,17 +13,19 @@ public interface IAuthService
 public class AuthService : IAuthService
 {
     private readonly IConfiguration _configuration;
-    private const string HardcodedUsername = "";
-    private const string HardcodedPassword = "";
+    private readonly string _testUsername;
+    private readonly string _testPassword;
 
     public AuthService(IConfiguration configuration)
     {
         _configuration = configuration;
+        _testUsername = configuration["TestCreds:Username"] ?? throw new ArgumentNullException("TestCreds:Username is not configured");
+        _testPassword = configuration["TestCreds:Password"] ?? throw new ArgumentNullException("TestCreds:Password is not configured");
     }
 
     public string GenerateToken(string username, string password)
     {
-        if (username != HardcodedUsername || password != HardcodedPassword)
+        if (username != _testUsername || password != _testPassword)
         {
             throw new UnauthorizedAccessException("Invalid credentials");
         }
