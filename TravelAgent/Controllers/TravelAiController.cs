@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TravelAgent.Models;
 using TravelAgent.ServiceClients;
 
 namespace TravelAgent.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class TravelAiController : ControllerBase
