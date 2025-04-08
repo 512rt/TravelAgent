@@ -16,7 +16,7 @@ public class TravelAiClient : ITravelAiClient
     public TravelAiClient(IConfiguration configuration, ILogger<TravelAiClient> logger)
     {
         _httpClient = new HttpClient();
-        _apiKey = configuration["GeminiApiKey"] ?? throw new ArgumentNullException("GeminiApiKey is not configured");
+        _apiKey = configuration["Gemini:ApiKey"] ?? throw new ArgumentNullException("Gemini:ApiKey is not configured");
         _logger = logger;
     }
 
