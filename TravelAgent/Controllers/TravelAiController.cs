@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using TravelAgent.Models;
 using TravelAgent.ServiceClients;
 
 namespace TravelAgent.Controllers;
@@ -26,7 +27,7 @@ public class TravelAiController : ControllerBase
                 return BadRequest("City name cannot be empty");
             }
 
-            var plan = await _travelAiClient.GetTravelPlanAsync(city);
+            TravelPlanResponse plan = await _travelAiClient.GetTravelPlanAsync(city);
             return Ok(plan);
         }
         catch (Exception ex)

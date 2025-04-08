@@ -1,3 +1,5 @@
+using TravelAgent.Models;
+
 namespace TravelAgent.ServiceClients;
 
 public interface ITravelAiClient

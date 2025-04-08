@@ -1,6 +1,8 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using TravelAgent.Models;
+using TravelAgent.Models.Gemini;
 
 namespace TravelAgent.ServiceClients;
 
@@ -129,44 +131,4 @@ public class TravelAiClient : ITravelAiClient
             throw new Exception("Failed to parse travel plan response", ex);
         }
     }
-}
-
-public class GeminiResponse
-{
-    [JsonPropertyName("candidates")]
-    public List<GeminiCandidate> Candidates { get; set; }
-}
-
-public class GeminiCandidate
-{
-    [JsonPropertyName("content")]
-    public GeminiContent Content { get; set; }
-}
-
-public class GeminiContent
-{
-    [JsonPropertyName("parts")]
-    public List<GeminiPart> Parts { get; set; }
-}
-
-public class GeminiPart
-{
-    [JsonPropertyName("text")]
-    public string Text { get; set; }
-}
-
-public class TravelPlanResponse
-{
-    public string City { get; set; } = string.Empty;
-    public List<Location> Locations { get; set; } = new();
-    public string TotalDistance { get; set; } = string.Empty;
-    public string TotalTime { get; set; } = string.Empty;
-}
-
-public class Location
-{
-    public string Name { get; set; } = string.Empty;
-    public string DistanceFromPrevious { get; set; } = string.Empty;
-    public string TimeToSpend { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
 }
