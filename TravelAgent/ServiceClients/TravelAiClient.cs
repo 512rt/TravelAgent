@@ -1,7 +1,5 @@
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using System.Text.Json.Serialization;
 
 namespace TravelAgent.ServiceClients;
@@ -11,14 +9,13 @@ public class TravelAiClient : ITravelAiClient
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
     private readonly ILogger<TravelAiClient> _logger;
-    private readonly string _modelEndpoint = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1";
+    private const string GeminiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
     public TravelAiClient(IConfiguration configuration, ILogger<TravelAiClient> logger)
     {
         _httpClient = new HttpClient();
-        _apiKey = configuration["HuggingFace:ApiKey"] ?? throw new ArgumentNullException("HuggingFace:ApiKey is not configured");
+        _apiKey = configuration["Gemini:ApiKey"] ?? throw new ArgumentNullException("Gemini:ApiKey is not configured");
         _logger = logger;
-        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
     }
 
     public async Task<TravelPlanResponse> GetTravelPlanAsync(string city)
@@ -26,83 +23,80 @@ public class TravelAiClient : ITravelAiClient
         try
         {
             _logger.LogInformation("Generating travel plan for city: {City}", city);
-            
+
             var prompt = GenerateTravelPrompt(city);
+
             var requestBody = new
             {
-                inputs = prompt,
-                parameters = new
+                contents = new[]
                 {
-                    max_new_tokens = 1000,
-                    temperature = 0.7,
-                    top_p = 0.9,
-                    return_full_text = false
+                    new
+                    {
+                        parts = new[]
+                        {
+                            new { text = prompt }
+                        }
+                    }
                 }
             };
 
             var jsonContent = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            _logger.LogDebug("Sending request to Hugging Face API");
-            var response = await _httpClient.PostAsync(_modelEndpoint, content);
-            
+            var requestUrl = $"{GeminiEndpoint}?key={_apiKey}";
+
+            _logger.LogDebug("Sending request to Gemini API");
+            var response = await _httpClient.PostAsync(requestUrl, content);
+
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                _logger.LogError("Hugging Face API returned error: {StatusCode} - {Content}", 
+                _logger.LogError("Gemini API returned error: {StatusCode} - {Content}",
                     response.StatusCode, errorContent);
-                
-                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                {
-                    throw new Exception("Invalid or missing Hugging Face API key. Please check your configuration.");
-                }
-                else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    throw new Exception("Model not found. Please check the model endpoint.");
-                }
-                
-                throw new Exception($"Hugging Face API error: {response.StatusCode} - {errorContent}");
+                throw new Exception($"Gemini API error: {response.StatusCode} - {errorContent}");
             }
 
             var responseContent = await response.Content.ReadAsStringAsync();
-            _logger.LogDebug("Received response from Hugging Face API: {Response}", responseContent);
+            _logger.LogDebug("Received response from Gemini API: {Response}", responseContent);
 
-            // Parse the response as an array of HuggingFaceResponse
-            var aiResponses = JsonSerializer.Deserialize<List<HuggingFaceResponse>>(responseContent);
-            if (aiResponses == null || !aiResponses.Any() || string.IsNullOrEmpty(aiResponses[0].GeneratedText))
-            {
-                throw new Exception("Invalid response from Hugging Face API");
-            }
+            var geminiResponse = JsonSerializer.Deserialize<GeminiResponse>(responseContent);
+            var text = geminiResponse?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
 
-            return ParseTravelPlanResponse(aiResponses[0].GeneratedText);
+            if (string.IsNullOrWhiteSpace(text))
+                throw new Exception("No content returned from Gemini API");
+
+            return ParseTravelPlanResponse(text);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error generating travel plan for {City}", city);
+            _logger.LogError(ex, $"Error generating travel plan for {city}");
             throw;
         }
     }
 
     private string GenerateTravelPrompt(string city)
     {
-        return $@"<s>[INST] Create a detailed one-day travel plan for {city}. 
-        The response should be in JSON format with the following structure:
-        {{
-            ""city"": ""{city}"",
-            ""locations"": [
+        return $@"Create a detailed one-day travel itinerary for the city of {city}.
+
+            Return the response in valid JSON format using the following structure:
+            {{
+              ""city"": ""{city}"",
+              ""locations"": [
                 {{
-                    ""name"": ""Location Name"",
-                    ""distanceFromPrevious"": ""Distance in km"",
-                    ""timeToSpend"": ""Time in hours"",
-                    ""description"": ""Brief description""
+                  ""name"": ""Location Name"",
+                  ""distanceFromPrevious"": ""Distance in kilometers"",
+                  ""timeToSpend"": ""Time in hours"",
+                  ""description"": ""Brief description""
                 }}
-            ],
-            ""totalDistance"": ""Total distance in km"",
-            ""totalTime"": ""Total time in hours""
-        }}
-        Include 5-7 popular tourist attractions, considering reasonable travel times between locations.
-        Make sure the total time adds up to a full day (8-10 hours).
-        [/INST]</s>";
+              ],
+              ""totalDistance"": ""Total distance in kilometers"",
+              ""totalTime"": ""Total time in hours""
+            }}
+            
+            Constraints:
+            - Only return the JSON.
+            - Ensure the JSON is complete and well-formed.
+            - Avoid special characters or non-English text in any of the fields.";
     }
 
     private TravelPlanResponse ParseTravelPlanResponse(string aiResponse)
@@ -110,8 +104,24 @@ public class TravelAiClient : ITravelAiClient
         try
         {
             _logger.LogDebug("Parsing AI response: {Response}", aiResponse);
-            return JsonSerializer.Deserialize<TravelPlanResponse>(aiResponse) 
-                ?? throw new Exception("Failed to parse AI response");
+
+            var jsonStart = aiResponse.IndexOf('{');
+            var jsonEnd = aiResponse.LastIndexOf('}');
+            if (jsonStart == -1 || jsonEnd == -1 || jsonEnd <= jsonStart)
+                throw new Exception("Could not extract JSON from AI response.");
+
+            var rawJson = aiResponse.Substring(jsonStart, jsonEnd - jsonStart + 1);
+            var cleanedJson = rawJson
+                .Replace("\r", "")
+                .Replace("\n", "")
+                .Replace("\t", "")
+                .Replace(",}", "}")
+                .Replace(",]", "]");
+
+            _logger.LogDebug("Cleaned JSON content: {Json}", cleanedJson);
+            var travelPlan = Newtonsoft.Json.JsonConvert.DeserializeObject<TravelPlanResponse>(cleanedJson);
+
+            return travelPlan ?? throw new Exception("Deserialized object is null");
         }
         catch (Exception ex)
         {
@@ -121,10 +131,28 @@ public class TravelAiClient : ITravelAiClient
     }
 }
 
-public class HuggingFaceResponse
+public class GeminiResponse
 {
-    [JsonPropertyName("generated_text")]
-    public string GeneratedText { get; set; } = string.Empty;
+    [JsonPropertyName("candidates")]
+    public List<GeminiCandidate> Candidates { get; set; }
+}
+
+public class GeminiCandidate
+{
+    [JsonPropertyName("content")]
+    public GeminiContent Content { get; set; }
+}
+
+public class GeminiContent
+{
+    [JsonPropertyName("parts")]
+    public List<GeminiPart> Parts { get; set; }
+}
+
+public class GeminiPart
+{
+    [JsonPropertyName("text")]
+    public string Text { get; set; }
 }
 
 public class TravelPlanResponse
