@@ -17,24 +17,24 @@ public class AuthController : ControllerBase
         _logger = logger;
     }
 
-    [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginRequest request)
-    {
-        try
-        {
-            var token = _authService.GenerateToken(request.Username, request.Password);
-            return Ok(new { token });
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return Unauthorized(new { message = "Invalid credentials" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error during login");
-            return StatusCode(500, new { message = "An error occurred during login" });
-        }
-    }
+    //[HttpPost("login")]
+    //public IActionResult Login([FromBody] LoginRequest request)
+    //{
+    //    try
+    //    {
+    //        var token = _authService.GenerateToken(request.Username, request.Password);
+    //        return Ok(new { token });
+    //    }
+    //    catch (UnauthorizedAccessException)
+    //    {
+    //        return Unauthorized(new { message = "Invalid credentials" });
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, "Error during login");
+    //        return StatusCode(500, new { message = "An error occurred during login" });
+    //    }
+    //}
 
 
     [HttpPost("register")]
@@ -54,8 +54,8 @@ public class AuthController : ControllerBase
         
     }
 
-    [HttpPost("login2")]
-    public async Task<IActionResult> Login2([FromBody] LoginRequest model)
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
         try
         {
