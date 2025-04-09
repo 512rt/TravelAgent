@@ -42,6 +42,7 @@ public class AuthController : ControllerBase
     {
         try
         {
+            _logger.LogTrace($"Register called with Register_Username: {model.Username}");
             var success = await _authService.RegisterAsync(model.Username, model.Password);
             if (!success) return BadRequest("Username already exists");
             return Ok("Registered successfully");
@@ -59,6 +60,7 @@ public class AuthController : ControllerBase
     {
         try
         {
+            _logger.LogTrace($"Login called with Login_Username: {model.Username}");
             var token = await _authService.LoginAsync(model.Username, model.Password);
             if (token == null) return Unauthorized("Invalid credentials");
             return Ok(new { token });

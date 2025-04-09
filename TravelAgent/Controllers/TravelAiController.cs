@@ -24,6 +24,8 @@ public class TravelAiController : ControllerBase
     {
         try
         {
+            _logger.LogTrace($"GetTravelPlan called with city: {city}");
+
             if (string.IsNullOrWhiteSpace(city))
             {
                 return BadRequest("City name cannot be empty");
