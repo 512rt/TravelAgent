@@ -5,11 +5,17 @@ using Scalar.AspNetCore;
 using System.Text;
 using TravelAgent.Services;
 using TravelAgent.ServiceClients;
+using System;
+using TravelAgent.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+builder.Services.AddDbContext<TravelAgentDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -35,4 +35,21 @@ public class AuthController : ControllerBase
             return StatusCode(500, new { message = "An error occurred during login" });
         }
     }
+
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] LoginRequest model)
+    {
+        var success = await _authService.RegisterAsync(model.Username, model.Password);
+        if (!success) return BadRequest("Username already exists");
+        return Ok("Registered successfully");
+    }
+
+    [HttpPost("login2")]
+    public async Task<IActionResult> Login2([FromBody] LoginRequest model)
+    {
+        var token = await _authService.LoginAsync(model.Username, model.Password);
+        if (token == null) return Unauthorized("Invalid credentials");
+        return Ok(new { token });
+    }
 }
