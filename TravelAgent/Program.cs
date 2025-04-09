@@ -14,6 +14,21 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+
+      //  policy.WithOrigins("https://yourfrontend.com")
+      //.AllowAnyMethod()
+      //.AllowAnyHeader();
+    });
+});
+
+
 builder.Services.AddDbContext<TravelAgentDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -88,6 +103,8 @@ app.MapScalarApiReference(); // Maps the Scalar UI endpoint
 
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
 
 // Add authentication and authorization middleware
 app.UseAuthentication();
