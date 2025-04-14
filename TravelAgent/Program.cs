@@ -24,16 +24,23 @@ builder.Services.AddApplicationInsightsTelemetry();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
 
-        //  policy.WithOrigins("https://yourfrontend.com")
-        //      .AllowAnyMethod()
-        //      .AllowAnyHeader();
+    options.AddPolicy("AllowUIAndLocalhost", policy =>
+    {
+        policy.WithOrigins(
+                "https://brave-bay-05bdb560f.6.azurestaticapps.net",
+                "http://localhost:5050"
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader();
     });
+
+    // options.AddPolicy("AllowAll", policy =>
+    // {
+    //     // policy.AllowAnyOrigin()
+    //     //       .AllowAnyMethod()
+    //     //       .AllowAnyHeader();
+    // });
 });
 
 
@@ -79,7 +86,8 @@ app.MapHealthChecks("/health");
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAll");
+//app.UseCors("AllowAll");
+app.UseCors("AllowUIAndLocalhost");
 
 // Add authentication and authorization middleware
 app.UseAuthentication();
