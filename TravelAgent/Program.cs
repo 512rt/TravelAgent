@@ -8,11 +8,17 @@ using TravelAgent.ServiceClients;
 using System;
 using TravelAgent.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// Register health checks
+builder.Services.AddHealthChecks();
 
 builder.Services.AddApplicationInsightsTelemetry();
 
@@ -24,9 +30,9 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowAnyHeader();
 
-      //  policy.WithOrigins("https://yourfrontend.com")
-      //.AllowAnyMethod()
-      //.AllowAnyHeader();
+        //  policy.WithOrigins("https://yourfrontend.com")
+        //      .AllowAnyMethod()
+        //      .AllowAnyHeader();
     });
 });
 
@@ -60,49 +66,16 @@ builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ITravelAiClient, TravelAiClient>();
 
-// Configure Swagger/OpenAPI with JWT support
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen(c =>
-//{
-//    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Travel Agent API", Version = "v1" });
-    
-//    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-//    {
-//        Description = "JWT Authorization header using the Bearer scheme",
-//        Name = "Authorization",
-//        In = ParameterLocation.Header,
-//        Type = SecuritySchemeType.ApiKey,
-//        Scheme = "Bearer"
-//    });
-
-//    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-//    {
-//        {
-//            new OpenApiSecurityScheme
-//            {
-//                Reference = new OpenApiReference
-//                {
-//                    Type = ReferenceType.SecurityScheme,
-//                    Id = "Bearer"
-//                }
-//            },
-//            Array.Empty<string>()
-//        }
-//    });
-//});
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
 
 app.MapOpenApi();
 app.MapScalarApiReference(); // Maps the Scalar UI endpoint
 
+app.MapGet("/", () => "Welcome to Travel Agent AI API");
+
+// Map health check endpoint
+app.MapHealthChecks("/health");
 
 app.UseHttpsRedirection();
 
