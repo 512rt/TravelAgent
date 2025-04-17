@@ -11,12 +11,12 @@ public class TravelAiClient : ITravelAiClient
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
     private readonly ILogger<TravelAiClient> _logger;
-    private const string GeminiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-
-    public TravelAiClient(IConfiguration configuration, ILogger<TravelAiClient> logger)
+    private readonly string _geminiUrl;
+    public TravelAiClient(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<TravelAiClient> logger)
     {
-        _httpClient = new HttpClient();
+        _httpClient = httpClientFactory.CreateClient("AIClient");
         _apiKey = configuration["Gemini:ApiKey"] ?? throw new ArgumentNullException("Gemini:ApiKey is not configured");
+        _geminiUrl = $"{configuration["Gemini:BaseUrl"]}{configuration["Gemini:ModelRelativeUrl"]}";
         _logger = logger;
     }
 
@@ -45,7 +45,7 @@ public class TravelAiClient : ITravelAiClient
             var jsonContent = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            var requestUrl = $"{GeminiEndpoint}?key={_apiKey}";
+            var requestUrl = $"{_geminiUrl}?key={_apiKey}";
 
             _logger.LogDebug("Sending request to Gemini API");
             var response = await _httpClient.PostAsync(requestUrl, content);
@@ -78,28 +78,6 @@ public class TravelAiClient : ITravelAiClient
 
     private string GenerateTravelPrompt(string city)
     {
-        //return $@"Create a detailed one-day travel itinerary for the city of {city}.
-
-        //    Return the response in valid JSON format using the following structure:
-        //    {{
-        //      ""city"": ""{city}"",
-        //      ""locations"": [
-        //        {{
-        //          ""name"": ""Location Name"",
-        //          ""distanceFromPrevious"": ""Distance in kilometers"",
-        //          ""timeToSpend"": ""Time in hours"",
-        //          ""description"": ""Brief description""
-        //        }}
-        //      ],
-        //      ""totalDistance"": ""Total distance in kilometers"",
-        //      ""totalTime"": ""Total time in hours""
-        //    }}
-
-        //    Constraints:
-        //    - Only return the JSON.
-        //    - Ensure the JSON is complete and well-formed.
-        //    - Avoid special characters or non-English text in any of the fields.";
-
         return $@"Create a detailed one-day travel itinerary for the city of {city}.
 
             Determine the standard distance unit ('km' or 'miles') predominantly used in the country/region of {city}. Use this determined unit consistently for all distance values in the output.
