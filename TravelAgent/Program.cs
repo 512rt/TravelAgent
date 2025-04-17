@@ -1,19 +1,14 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Scalar.AspNetCore;
-using System.Text;
-using TravelAgent.Services;
-using TravelAgent.ServiceClients;
-using System;
-using TravelAgent.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Polly.Extensions.Http;
+using Microsoft.IdentityModel.Tokens;
 using Polly;
 using Polly.Contrib.WaitAndRetry;
+using Polly.Extensions.Http;
+using Scalar.AspNetCore;
+using System.Text;
+using TravelAgent.Data;
+using TravelAgent.ServiceClients;
+using TravelAgent.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,8 +82,6 @@ var retryPolicy = HttpPolicyExtensions
 builder.Services.AddHttpClient("AIClient")
     .AddPolicyHandler(retryPolicy);
 
-builder.Services.AddHttpClient();
-
 var app = builder.Build();
 
 app.MapOpenApi();
@@ -111,3 +104,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
