@@ -13,6 +13,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Polly.Extensions.Http;
 using Polly;
+using Polly.Contrib.WaitAndRetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,17 +76,13 @@ builder.Services.AddScoped<ITravelAiClient, TravelAiClient>();
 
 builder.Services.AddOpenApi();
 
+// Adds Jitters for Retry.
+var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(5), retryCount: 3);
+
 // Define the retry policy with exponential backoff
 var retryPolicy = HttpPolicyExtensions
     .HandleTransientHttpError()
-    .WaitAndRetryAsync(
-        retryCount: 3,
-        sleepDurationProvider: retryAttempt =>
-            TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // 2, 4, 8 seconds
-        onRetry: (outcome, timespan, retryAttempt, context) =>
-        {
-            Console.WriteLine($"Retry {retryAttempt} after {timespan.TotalSeconds} seconds due to: {outcome.Exception?.Message}");
-        });
+    .WaitAndRetryAsync(delay);
 
 builder.Services.AddHttpClient("AIClient")
     .AddPolicyHandler(retryPolicy);
