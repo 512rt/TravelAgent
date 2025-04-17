@@ -39,7 +39,7 @@ public class TravelAiController : ControllerBase
             _logger.LogError(ex, "Error generating travel plan for {City}", city);
             
             // Return appropriate status code based on the exception
-            if (ex.Message.Contains("Hugging Face API error"))
+            if (ex.Message.Contains("Gemini AI API error"))
             {
                 return StatusCode(502, new { error = "Error communicating with AI service", details = ex.Message });
             }

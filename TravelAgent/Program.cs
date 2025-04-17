@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Polly.Extensions.Http;
+using Polly;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,10 +64,26 @@ builder.Services.AddAuthorization();
 
 // Add services
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddOpenApi();
-builder.Services.AddHttpClient();
 builder.Services.AddScoped<ITravelAiClient, TravelAiClient>();
 
+builder.Services.AddOpenApi();
+
+// Define the retry policy with exponential backoff
+var retryPolicy = HttpPolicyExtensions
+    .HandleTransientHttpError()
+    .WaitAndRetryAsync(
+        retryCount: 3,
+        sleepDurationProvider: retryAttempt =>
+            TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // 2, 4, 8 seconds
+        onRetry: (outcome, timespan, retryAttempt, context) =>
+        {
+            Console.WriteLine($"Retry {retryAttempt} after {timespan.TotalSeconds} seconds due to: {outcome.Exception?.Message}");
+        });
+
+builder.Services.AddHttpClient("AIClient")
+    .AddPolicyHandler(retryPolicy);
+
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
