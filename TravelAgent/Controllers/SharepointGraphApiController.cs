@@ -77,6 +77,26 @@ namespace TravelAgent.Controllers
             }
         }
 
+        [HttpGet("{siteId}/{driveId}/files-paged")]
+        public async Task<IActionResult> GetFilesPaged(string siteId, string driveId, int pageSize, string? nextLink)
+        {
+            try
+            {
+                var files = await _spGraphApiClient.GetFilesPagedAsync(siteId, driveId, pageSize, nextLink);
+                return Ok(files);
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode((int)(ex.StatusCode ?? HttpStatusCode.InternalServerError),
+                                  $"HTTP error: {(int?)ex.StatusCode} - {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error retrieving files: {ex.Message}");
+            }
+        }
+
+
         [HttpGet("{siteId}/{driveId}/folder/{folderName}")]
         public async Task<IActionResult> GetFilesInFolder(string siteId, string driveId, string folderName)
         {
@@ -95,7 +115,7 @@ namespace TravelAgent.Controllers
                 return StatusCode(500, $"Error retrieving folder contents: {ex.Message}");
             }
         }
-
+        
         [HttpPost("{siteId}/{driveId}/upload")]
         public async Task<IActionResult> UploadFile(string siteId, string driveId, IFormFile file)
         {
@@ -106,7 +126,7 @@ namespace TravelAgent.Controllers
             {
                 using var stream = file.OpenReadStream();
                 var success = await _spGraphApiClient.UploadDocumentAsync(siteId, driveId, file.FileName, stream);
-                return success ? Ok("File uploaded successfully.") : StatusCode(500, "Upload failed.");
+                return success ? Ok($"{file.FileName} uploaded successfully.") : StatusCode(500, "Upload failed.");
             }
             catch (HttpRequestException ex)
             {
