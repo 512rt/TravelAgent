@@ -72,7 +72,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITravelAiClient, TravelAiClient>();
 builder.Services.AddSingleton<IGraphAuthProvider, GraphAuthProvider>();
 builder.Services.AddScoped<ISharepointGraphServiceClinet, SharepointGraphServiceClinet>();
-builder.Services.AddScoped<ISharePointRestApiClient, SharePointRestApiClient>();
+//builder.Services.AddScoped<ISharePointRestApiClient, SharePointRestApiClient>();
 
 builder.Services.AddOpenApi();
 
