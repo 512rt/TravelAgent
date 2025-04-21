@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TravelAgent.Models;
-using TravelAgent.Services;
+using TravelAgent.Services.Interfaces;
 
 namespace TravelAgent.Controllers;
 

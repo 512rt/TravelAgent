@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using TravelAgent.Data;
 using TravelAgent.Models.Data;
+using TravelAgent.Services.Interfaces;
 using TravelAgent.Utils;
 
 namespace TravelAgent.Services;

@@ -1,4 +1,4 @@
-﻿namespace TravelAgent.Services
+﻿namespace TravelAgent.Services.Interfaces
 {
     public interface IAuthService
     {

@@ -8,7 +8,9 @@ using Scalar.AspNetCore;
 using System.Text;
 using TravelAgent.Data;
 using TravelAgent.ServiceClients;
+using TravelAgent.ServiceClients.Interfaces;
 using TravelAgent.Services;
+using TravelAgent.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +70,9 @@ builder.Services.AddAuthorization();
 // Add services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITravelAiClient, TravelAiClient>();
+builder.Services.AddSingleton<IGraphAuthProvider, GraphAuthProvider>();
+builder.Services.AddScoped<ISharepointGraphServiceClinet, SharepointGraphServiceClinet>();
+builder.Services.AddScoped<ISharePointRestApiClient, SharePointRestApiClient>();
 
 builder.Services.AddOpenApi();
 
@@ -81,6 +86,9 @@ var retryPolicy = HttpPolicyExtensions
 
 builder.Services.AddHttpClient("AIClient")
     .AddPolicyHandler(retryPolicy);
+
+builder.Services.AddHttpClient<ISharepointGraphApiClient, SharepointGraphApiClient>();
+
 
 var app = builder.Build();
 
