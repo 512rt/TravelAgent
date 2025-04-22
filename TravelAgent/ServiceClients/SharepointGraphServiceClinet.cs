@@ -11,7 +11,7 @@ namespace TravelAgent.ServiceClients
     {
         private readonly GraphServiceClient _graphClient;
 
-        public SharepointGraphServiceClinet(IGraphAuthProvider authProvider)
+        public SharepointGraphServiceClinet(ISharePointAuthProvider authProvider)
         {
             _graphClient = new GraphServiceClient(authProvider.GetTokenCredential());
         }

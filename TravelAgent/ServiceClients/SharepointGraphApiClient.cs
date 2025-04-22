@@ -9,9 +9,9 @@ namespace TravelAgent.ServiceClients
     public class SharepointGraphApiClient : ISharepointGraphApiClient
     {
         private readonly HttpClient _httpClient;
-        private readonly IGraphAuthProvider _authProvider;
+        private readonly ISharePointAuthProvider _authProvider;
 
-        public SharepointGraphApiClient(IHttpClientFactory httpClientFactory, IGraphAuthProvider authProvider)
+        public SharepointGraphApiClient(IHttpClientFactory httpClientFactory, ISharePointAuthProvider authProvider)
         {
             _httpClient = httpClientFactory.CreateClient("SPGraphAPIClient");
             _authProvider = authProvider;

@@ -2,7 +2,7 @@
 
 namespace TravelAgent.Services.Interfaces
 {
-    public interface IGraphAuthProvider
+    public interface ISharePointAuthProvider
     {
         Task<string> GetGraphAPIAccessTokenAsync();
         Task<string> GetSharePointAPIAccessTokenAsync();

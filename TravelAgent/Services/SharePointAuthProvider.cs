@@ -6,7 +6,7 @@ using TravelAgent.Services.Interfaces;
 
 namespace TravelAgent.Services
 {
-    public class GraphAuthProvider : IGraphAuthProvider
+    public class SharePointAuthProvider : ISharePointAuthProvider
     {
         private readonly IConfiguration _config;
         private readonly ClientSecretCredential _credential;
@@ -17,7 +17,7 @@ namespace TravelAgent.Services
         private AccessToken _cachedSharePointAPIToken;
         private DateTimeOffset _cachedSharePointAPIExpiry;
 
-        public GraphAuthProvider(IConfiguration config)
+        public SharePointAuthProvider(IConfiguration config)
         {
             _config = config;
 

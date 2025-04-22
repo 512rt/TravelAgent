@@ -70,7 +70,7 @@ builder.Services.AddAuthorization();
 // Add services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITravelAiClient, TravelAiClient>();
-builder.Services.AddSingleton<IGraphAuthProvider, GraphAuthProvider>();
+builder.Services.AddSingleton<ISharePointAuthProvider, SharePointAuthProvider>();
 builder.Services.AddScoped<ISharepointGraphServiceClinet, SharepointGraphServiceClinet>();
 builder.Services.AddScoped<ISharepointGraphApiClient, SharepointGraphApiClient>();
 //builder.Services.AddScoped<ISharePointRestApiClient, SharePointRestApiClient>();
