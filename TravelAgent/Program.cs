@@ -72,6 +72,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITravelAiClient, TravelAiClient>();
 builder.Services.AddSingleton<IGraphAuthProvider, GraphAuthProvider>();
 builder.Services.AddScoped<ISharepointGraphServiceClinet, SharepointGraphServiceClinet>();
+builder.Services.AddScoped<ISharepointGraphApiClient, SharepointGraphApiClient>();
 //builder.Services.AddScoped<ISharePointRestApiClient, SharePointRestApiClient>();
 
 builder.Services.AddOpenApi();
@@ -87,7 +88,11 @@ var retryPolicy = HttpPolicyExtensions
 builder.Services.AddHttpClient("AIClient")
     .AddPolicyHandler(retryPolicy);
 
-builder.Services.AddHttpClient<ISharepointGraphApiClient, SharepointGraphApiClient>();
+builder.Services.AddHttpClient("SPGraphAPIClient", (serviceProvider, client) =>
+{
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+})
+.AddPolicyHandler(retryPolicy);
 
 
 var app = builder.Build();
